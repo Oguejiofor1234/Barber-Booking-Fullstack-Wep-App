@@ -103,7 +103,7 @@ jobs:
         working-directory: backend
 
       - name: Run backend tests
-        run: npm test
+        run: npm test -- --verbose
         working-directory: backend
 
   # ────────────────────────────────────────────────────────────────────────────

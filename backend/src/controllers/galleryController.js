@@ -1,8 +1,6 @@
-const { PrismaClient } = require('@prisma/client');
+const prisma = require('../lib/prisma');
 const fs = require('fs');
 const path = require('path');
-
-const prisma = new PrismaClient();
 
 // POST /api/gallery  (multipart/form-data)
 const uploadMedia = async (req, res) => {
