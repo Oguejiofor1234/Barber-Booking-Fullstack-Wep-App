@@ -1,5 +1,6 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const { validationResult } = require('express-validator');
 const prisma = require('../lib/prisma');
 
 const generateToken = (user) =>
@@ -11,6 +12,10 @@ const generateToken = (user) =>
 
 // POST /api/auth/register
 const register = async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
   const { name, email, password, phone } = req.body;
   try {
     const existing = await prisma.user.findUnique({ where: { email } });
