@@ -13,6 +13,9 @@ const transporter = nodemailer.createTransport({
 const FROM = `"${process.env.SHOP_NAME || 'JP Barber Shop'}" <${process.env.SMTP_USER}>`;
 const TIMEZONE = process.env.SHOP_TIMEZONE || 'America/Toronto';
 
+// Skip sending if SMTP is not configured (test / dev environments)
+const smtpEnabled = () => !!(process.env.SMTP_USER && process.env.SMTP_PASS);
+
 /**
  * Format a booking date/time using the appropriate locale.
  */
@@ -38,6 +41,7 @@ const wrapHtml = (body) => `
 // Customer email: booking received
 // ─────────────────────────────────────────────────────────────────────────────
 const sendBookingConfirmationToCustomer = async ({ customerEmail, customerName, barberName, service, dateTime, bookingId, lang = 'en' }) => {
+  if (!smtpEnabled()) return;
   const isFr = lang === 'fr';
 
   const subject = isFr ? '📅 Demande de Réservation Reçue !' : '📅 Booking Request Received!';
@@ -69,6 +73,7 @@ const sendBookingConfirmationToCustomer = async ({ customerEmail, customerName, 
 // Customer email: booking confirmed or cancelled by barber
 // ─────────────────────────────────────────────────────────────────────────────
 const sendBookingStatusToCustomer = async ({ customerEmail, customerName, service, dateTime, status, lang = 'en' }) => {
+  if (!smtpEnabled()) return;
   const isFr = lang === 'fr';
   const isConfirmed = status === 'CONFIRMED';
   const color = isConfirmed ? '#28a745' : '#dc3545';
@@ -105,6 +110,7 @@ const sendBookingStatusToCustomer = async ({ customerEmail, customerName, servic
 // Barber emails — always in English (internal staff)
 // ─────────────────────────────────────────────────────────────────────────────
 const sendCancellationToBarber = async ({ barberEmail, barberName, customerName, service, dateTime }) => {
+  if (!smtpEnabled()) return;
   await transporter.sendMail({
     from: FROM,
     to: barberEmail,
@@ -123,6 +129,7 @@ const sendCancellationToBarber = async ({ barberEmail, barberName, customerName,
 };
 
 const sendNewBookingToBarber = async ({ barberEmail, barberName, customerName, service, dateTime, bookingId }) => {
+  if (!smtpEnabled()) return;
   await transporter.sendMail({
     from: FROM,
     to: barberEmail,
