@@ -1,0 +1,177 @@
+{
+  "nav": {
+    "home": "Accueil",
+    "gallery": "Galerie",
+    "dashboard": "Tableau de Bord",
+    "bookNow": "Réserver",
+    "login": "Connexion",
+    "signUp": "S'inscrire",
+    "logout": "Déconnexion",
+    "greeting": "Bonjour,"
+  },
+  "hero": {
+    "tagline": "JP BARBIER",
+    "headline1": "Ayez du Style.",
+    "headline2": "Sentez-vous Bien.",
+    "description": "Découvrez l'art du soin à son meilleur. Des barbiers experts, des techniques classiques et des styles modernes — le tout en un seul endroit.",
+    "bookAppointment": "Prendre Rendez-vous",
+    "viewGallery": "Voir la Galerie",
+    "stats": {
+      "clients": "Clients Satisfaits",
+      "experience": "Ans d'Expérience",
+      "rating": "Note Moyenne"
+    },
+    "scroll": "Défiler",
+    "expertCut": "Coupe Expert",
+    "topRated": "Très Bien Noté"
+  },
+  "services": {
+    "badge": "Ce que Nous Offrons",
+    "title": "Nos Services",
+    "subtitle": "Chaque service est réalisé avec soin, compétence et attention aux détails.",
+    "bookService": "Réserver un Service",
+    "items": [
+      { "name": "Coupe Classique",              "desc": "Coupe de précision adaptée à votre style, des dégradés aux coupes texturées." },
+      { "name": "Taille & Mise en Forme",       "desc": "Mise en forme et soins experts pour une barbe nette et définie." },
+      { "name": "Rasage à la Serviette Chaude", "desc": "Rasage traditionnel au rasoir droit avec traitement à la serviette chaude." },
+      { "name": "Combo Coupe + Barbe",          "desc": "Forfait soins complet — coupe de cheveux et mise en forme de la barbe." },
+      { "name": "Traitement Capillaire",        "desc": "Conditionnement profond, massage du cuir chevelu et traitement hydratant." },
+      { "name": "Coupe Enfant",                 "desc": "Service amusant et patient pour les garçons de 2 à 12 ans." }
+    ]
+  },
+  "login": {
+    "title": "Bon Retour",
+    "subtitle": "Connectez-vous à votre compte",
+    "fields": {
+      "email":    { "label": "E-mail",        "placeholder": "vous@exemple.com" },
+      "password": { "label": "Mot de Passe",  "placeholder": "••••••••" }
+    },
+    "submit":     "Se Connecter",
+    "submitting": "Connexion...",
+    "noAccount":  "Vous n'avez pas de compte ?",
+    "signUp":     "S'inscrire"
+  },
+  "register": {
+    "title":    "Créer un Compte",
+    "subtitle": "Rejoignez-nous pour une expérience premium",
+    "fields": {
+      "name":     { "label": "Nom Complet",      "placeholder": "Jean Dupont" },
+      "email":    { "label": "E-mail",           "placeholder": "vous@exemple.com" },
+      "password": { "label": "Mot de Passe",     "placeholder": "Min. 6 caractères" },
+      "phone":    { "label": "Téléphone (opt.)", "placeholder": "+33 (0)1 00 00 00 00" }
+    },
+    "submit":        "Créer un Compte",
+    "submitting":    "Création du compte...",
+    "alreadyHave":   "Vous avez déjà un compte ?",
+    "signIn":        "Se Connecter",
+    "toast": {
+      "passwordLength": "Le mot de passe doit comporter au moins 6 caractères",
+      "success":        "Compte créé ! Redirection vers la réservation..."
+    }
+  },
+  "booking": {
+    "title":    "Réserver votre Rendez-vous",
+    "subtitle": "Cliquez sur un créneau horaire dans le calendrier pour le sélectionner, puis remplissez le formulaire ci-dessous.",
+    "form": {
+      "title":            "Nouvelle Réservation",
+      "selected":         "Sélectionné :",
+      "barberLabel":      "Barbier *",
+      "barberPlaceholder":"Choisir un barbier...",
+      "serviceLabel":     "Service *",
+      "notesLabel":       "Notes (optionnel)",
+      "notesPlaceholder": "Demandes spéciales...",
+      "submit":           "Prendre Rendez-vous",
+      "submitting":       "Réservation..."
+    },
+    "myBookings": {
+      "title": "Mes Réservations",
+      "empty": "Aucune réservation.",
+      "cancel": "Annuler"
+    },
+    "toast": {
+      "pastDate":      "Impossible de réserver dans le passé !",
+      "slotSelected":  "Créneau horaire sélectionné !",
+      "noDate":        "Veuillez sélectionner une date/heure sur le calendrier",
+      "noBarber":      "Veuillez sélectionner un barbier",
+      "success":       "Réservation soumise ! Vous recevrez un e-mail de confirmation.",
+      "cancelConfirm": "Annuler cette réservation ?",
+      "cancelSuccess": "Réservation annulée"
+    }
+  },
+  "dashboard": {
+    "titleBarber":   "Tableau de Bord Barbier",
+    "titleCustomer": "Mes Réservations",
+    "welcome":       "Bienvenue,",
+    "stats": {
+      "total":     "Total",
+      "pending":   "En Attente",
+      "confirmed": "Confirmées",
+      "cancelled": "Annulées"
+    },
+    "filter": { "all": "TOUS" },
+    "status": {
+      "PENDING":   "EN ATTENTE",
+      "CONFIRMED": "CONFIRMÉ",
+      "CANCELLED": "ANNULÉ",
+      "COMPLETED": "TERMINÉ"
+    },
+    "noBookings": "Aucune réservation trouvée.",
+    "table": {
+      "customer": "Client",
+      "barber":   "Barbier",
+      "service":  "Service",
+      "dateTime": "Date & Heure",
+      "status":   "Statut",
+      "actions":  "Actions"
+    },
+    "actions": {
+      "confirm":  "Confirmer",
+      "reject":   "Rejeter",
+      "complete": "Terminer",
+      "cancel":   "Annuler"
+    },
+    "confirmAction": {
+      "confirm":  "Êtes-vous sûr de vouloir confirmer cette réservation ?",
+      "cancel":   "Êtes-vous sûr de vouloir annuler cette réservation ?",
+      "complete": "Êtes-vous sûr de vouloir marquer cette réservation comme terminée ?"
+    },
+    "toast": {
+      "failLoad":  "Impossible de charger les réservations",
+      "confirmed": "Réservation confirmée",
+      "cancelled": "Réservation annulée",
+      "completed": "Réservation terminée"
+    }
+  },
+  "home": {
+    "whyUs": {
+      "badge": "Pourquoi Nous",
+      "title": "La Différence du Barber Shop",
+      "features": [
+        { "icon": "🎯", "title": "Précision Experte",  "desc": "Nos barbiers sont des professionnels formés avec des années d'expérience dans tous les styles de coupe." },
+        { "icon": "📅", "title": "Réservation Facile", "desc": "Réservez votre rendez-vous en ligne à tout moment et recevez une confirmation par e-mail instantanée." },
+        { "icon": "✨", "title": "Produits Premium",   "desc": "Nous utilisons uniquement les meilleurs produits de toilettage pour un résultat supérieur à chaque fois." }
+      ]
+    },
+    "craft": {
+      "badge": "Notre Métier",
+      "title": "Là où le Style Rencontre la",
+      "highlight": "Tradition",
+      "description": "Entrez dans un espace où chaque détail compte. Du rasage classique au rasoir droit jusqu'au dégradé le plus net, nos barbiers apportent des décennies de compétences combinées à chaque chaise.",
+      "tags": ["Coupes Classiques", "Soins de Barbe", "Rasage au Chaud", "Traitement Capillaire"]
+    },
+    "testimonials": {
+      "badge": "Témoignages",
+      "title": "Ce que Disent nos Clients",
+      "items": [
+        { "text": "La meilleure coupe que j'ai jamais eue. James maîtrise vraiment son métier. Je reviendrai sans faute !" },
+        { "text": "Le rasage à la serviette chaude était une expérience ! Professionnel, propre et relaxant." },
+        { "text": "Réservation facile, pas d'attente, dégradé parfait à chaque fois. C'est mon endroit de prédilection." }
+      ]
+    },
+    "cta": {
+      "title": "Prêt pour un Nouveau Look ?",
+      "description": "Prenez rendez-vous aujourd'hui et repartez avec votre meilleur style.",
+      "button": "Prendre Rendez-vous"
+    }
+  }
+}

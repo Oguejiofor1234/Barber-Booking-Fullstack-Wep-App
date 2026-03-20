@@ -1,0 +1,40 @@
+version: "3.9"
+
+# ── Production overrides ──────────────────────────────────────────────────────
+# Usage: docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+# Requires DOCKERHUB_USERNAME env var to be set, e.g.:
+#   export DOCKERHUB_USERNAME=yourusername
+#   export IMAGE_TAG=latest   (or a git SHA)
+
+services:
+
+  postgres:
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD required}
+
+  backend:
+    image: ${DOCKERHUB_USERNAME}/barbershop-backend:${IMAGE_TAG:-latest}
+    build: null         # don't build locally in prod; use pre-built image
+    restart: always
+    environment:
+      NODE_ENV:       production
+      DATABASE_URL:   ${DATABASE_URL:?DATABASE_URL required}
+      JWT_SECRET:     ${JWT_SECRET:?JWT_SECRET required}
+      CLIENT_URL:     ${CLIENT_URL:-https://yourdomain.com}
+      SMTP_HOST:      ${SMTP_HOST}
+      SMTP_PORT:      ${SMTP_PORT:-587}
+      SMTP_USER:      ${SMTP_USER}
+      SMTP_PASS:      ${SMTP_PASS}
+      SHOP_NAME:      ${SHOP_NAME:-The Barber Shop}
+
+  frontend:
+    image: ${DOCKERHUB_USERNAME}/barbershop-frontend:${IMAGE_TAG:-latest}
+    build: null
+    restart: always
+
+  nginx:
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"    # add SSL termination here (e.g. via certbot)

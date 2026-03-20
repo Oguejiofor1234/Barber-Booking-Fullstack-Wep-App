@@ -1,0 +1,177 @@
+{
+  "nav": {
+    "home": "Home",
+    "gallery": "Gallery",
+    "dashboard": "Dashboard",
+    "bookNow": "Book Now",
+    "login": "Login",
+    "signUp": "Sign Up",
+    "logout": "Logout",
+    "greeting": "Hi,"
+  },
+  "hero": {
+    "tagline": "JP BARBER",
+    "headline1": "Look Sharp.",
+    "headline2": "Feel Great.",
+    "description": "Experience the art of grooming at its finest. Expert barbers, classic techniques, and modern styles — all in one place.",
+    "bookAppointment": "Book Appointment",
+    "viewGallery": "View Gallery",
+    "stats": {
+      "clients": "Happy Clients",
+      "experience": "Years Experience",
+      "rating": "Average Rating"
+    },
+    "scroll": "Scroll",
+    "expertCut": "Expert Cut",
+    "topRated": "Top Rated"
+  },
+  "services": {
+    "badge": "What We Offer",
+    "title": "Our Services",
+    "subtitle": "Every service is delivered with care, skill, and attention to detail.",
+    "bookService": "Book a Service",
+    "items": [
+      { "name": "Classic Haircut",      "desc": "Precision cut tailored to your style, from fades to textured cuts." },
+      { "name": "Beard Trim & Shape",   "desc": "Expert shaping and grooming for a clean, defined beard." },
+      { "name": "Hot Towel Shave",      "desc": "Traditional straight-razor shave with hot towel treatment." },
+      { "name": "Cut + Beard Combo",    "desc": "Complete grooming package — haircut plus beard shaping." },
+      { "name": "Hair Treatment",       "desc": "Deep conditioning, scalp massage, and moisturizing treatment." },
+      { "name": "Kids Haircut",         "desc": "Fun, patient service for boys aged 2–12." }
+    ]
+  },
+  "login": {
+    "title": "Welcome Back",
+    "subtitle": "Sign in to your account",
+    "fields": {
+      "email":    { "label": "Email",    "placeholder": "you@example.com" },
+      "password": { "label": "Password", "placeholder": "••••••••" }
+    },
+    "submit":     "Sign In",
+    "submitting": "Signing in...",
+    "noAccount":  "Don't have an account?",
+    "signUp":     "Sign Up"
+  },
+  "register": {
+    "title":    "Create Account",
+    "subtitle": "Join us for a premium experience",
+    "fields": {
+      "name":     { "label": "Full Name",    "placeholder": "John Doe" },
+      "email":    { "label": "Email",        "placeholder": "you@example.com" },
+      "password": { "label": "Password",     "placeholder": "Min. 6 characters" },
+      "phone":    { "label": "Phone (opt.)", "placeholder": "+1 (555) 000-0000" }
+    },
+    "submit":        "Create Account",
+    "submitting":    "Creating account...",
+    "alreadyHave":   "Already have an account?",
+    "signIn":        "Sign In",
+    "toast": {
+      "passwordLength": "Password must be at least 6 characters",
+      "success":        "Account created! Redirecting to booking..."
+    }
+  },
+  "booking": {
+    "title":    "Book Your Appointment",
+    "subtitle": "Click a time slot on the calendar to select it, then fill in the form below.",
+    "form": {
+      "title":            "New Booking",
+      "selected":         "Selected:",
+      "barberLabel":      "Barber *",
+      "barberPlaceholder":"Select a barber...",
+      "serviceLabel":     "Service *",
+      "notesLabel":       "Notes (optional)",
+      "notesPlaceholder": "Any special requests...",
+      "submit":           "Book Appointment",
+      "submitting":       "Booking..."
+    },
+    "myBookings": {
+      "title": "My Bookings",
+      "empty": "No bookings yet.",
+      "cancel": "Cancel"
+    },
+    "toast": {
+      "pastDate":   "Cannot book in the past!",
+      "slotSelected":"Time slot selected!",
+      "noDate":     "Please select a date/time on the calendar",
+      "noBarber":   "Please select a barber",
+      "success":    "Booking submitted! You will receive a confirmation email.",
+      "cancelConfirm": "Cancel this booking?",
+      "cancelSuccess": "Booking cancelled"
+    }
+  },
+  "dashboard": {
+    "titleBarber":   "Barber Dashboard",
+    "titleCustomer": "My Bookings",
+    "welcome":       "Welcome,",
+    "stats": {
+      "total":     "Total",
+      "pending":   "Pending",
+      "confirmed": "Confirmed",
+      "cancelled": "Cancelled"
+    },
+    "filter": { "all": "ALL" },
+    "status": {
+      "PENDING":   "PENDING",
+      "CONFIRMED": "CONFIRMED",
+      "CANCELLED": "CANCELLED",
+      "COMPLETED": "COMPLETED"
+    },
+    "noBookings": "No bookings found.",
+    "table": {
+      "customer": "Customer",
+      "barber":   "Barber",
+      "service":  "Service",
+      "dateTime": "Date & Time",
+      "status":   "Status",
+      "actions":  "Actions"
+    },
+    "actions": {
+      "confirm":  "Confirm",
+      "reject":   "Reject",
+      "complete": "Complete",
+      "cancel":   "Cancel"
+    },
+    "confirmAction": {
+      "confirm":  "Are you sure you want to confirm this booking?",
+      "cancel":   "Are you sure you want to cancel this booking?",
+      "complete": "Are you sure you want to mark this booking as complete?"
+    },
+    "toast": {
+      "failLoad":  "Failed to load bookings",
+      "confirmed": "Booking confirmed",
+      "cancelled": "Booking cancelled",
+      "completed": "Booking completed"
+    }
+  },
+  "home": {
+    "whyUs": {
+      "badge": "Why Us",
+      "title": "The Barber Shop Difference",
+      "features": [
+        { "icon": "🎯", "title": "Expert Precision",  "desc": "Our barbers are trained professionals with years of experience in all cut styles." },
+        { "icon": "📅", "title": "Easy Booking",      "desc": "Book your appointment online anytime, and get instant email confirmation." },
+        { "icon": "✨", "title": "Premium Products",  "desc": "We use only the best grooming products for a superior finish every time." }
+      ]
+    },
+    "craft": {
+      "badge": "Our Craft",
+      "title": "Where Style Meets",
+      "highlight": "Tradition",
+      "description": "Step into a space where every detail matters. From the classic straight razor shave to the sharpest modern fade, our barbers bring decades of combined skill to every chair.",
+      "tags": ["Classic Cuts", "Beard Styling", "Hot Towel Shave", "Hair Treatment"]
+    },
+    "testimonials": {
+      "badge": "Testimonials",
+      "title": "What Our Clients Say",
+      "items": [
+        { "text": "Best haircut I have ever had. James really knows his craft. Will definitely be back!" },
+        { "text": "The hot towel shave was an experience! Professional, clean, and relaxing." },
+        { "text": "Easy booking, no waiting, perfect fade every time. This is my go-to spot." }
+      ]
+    },
+    "cta": {
+      "title": "Ready for a Fresh Look?",
+      "description": "Book your appointment today and walk out looking your best.",
+      "button": "Book Appointment"
+    }
+  }
+}

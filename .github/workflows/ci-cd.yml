@@ -1,0 +1,218 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+env:
+  # Set your Docker Hub username in GitHub repo Settings → Secrets → Actions
+  DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+  IMAGE_TAG: ${{ github.sha }}
+
+jobs:
+  # ────────────────────────────────────────────────────────────────────────────
+  # JOB 1 — Lint
+  # ────────────────────────────────────────────────────────────────────────────
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: |
+            backend/package-lock.json
+            frontend/package-lock.json
+
+      - name: Install backend dependencies
+        run: npm ci
+        working-directory: backend
+
+      - name: Install frontend dependencies
+        run: npm ci
+        working-directory: frontend
+
+      - name: Lint backend
+        run: npm run lint
+        working-directory: backend
+
+      - name: Lint frontend
+        run: npm run lint
+        working-directory: frontend
+
+  # ────────────────────────────────────────────────────────────────────────────
+  # JOB 2 — Backend tests (with real Postgres)
+  # ────────────────────────────────────────────────────────────────────────────
+  test-backend:
+    name: Backend Tests
+    runs-on: ubuntu-latest
+    needs: lint
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB:       barbershop_test
+          POSTGRES_USER:     postgres
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/barbershop_test?schema=public
+      JWT_SECRET:   ci_test_jwt_secret
+      NODE_ENV:     test
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: backend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+        working-directory: backend
+
+      - name: Generate Prisma client
+        run: npx prisma generate
+        working-directory: backend
+
+      - name: Run database migrations
+        run: npx prisma migrate deploy
+        working-directory: backend
+
+      - name: Run backend tests
+        run: npm test -- --coverage
+        working-directory: backend
+
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-coverage
+          path: backend/coverage/
+
+  # ────────────────────────────────────────────────────────────────────────────
+  # JOB 3 — Frontend tests
+  # ────────────────────────────────────────────────────────────────────────────
+  test-frontend:
+    name: Frontend Tests
+    runs-on: ubuntu-latest
+    needs: lint
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+        working-directory: frontend
+
+      - name: Run frontend tests
+        run: npm test
+        working-directory: frontend
+
+  # ────────────────────────────────────────────────────────────────────────────
+  # JOB 4 — Build & push Docker images  (only on main branch push)
+  # ────────────────────────────────────────────────────────────────────────────
+  build-and-push:
+    name: Build & Push Docker Images
+    runs-on: ubuntu-latest
+    needs: [test-backend, test-frontend]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      # ── Backend image ────────────────────────────────────────────────────────
+      - name: Build & push backend image
+        uses: docker/build-push-action@v5
+        with:
+          context:   ./backend
+          file:      ./backend/Dockerfile
+          push:      true
+          tags: |
+            ${{ secrets.DOCKERHUB_USERNAME }}/barbershop-backend:latest
+            ${{ secrets.DOCKERHUB_USERNAME }}/barbershop-backend:${{ github.sha }}
+          cache-from: type=gha
+          cache-to:   type=gha,mode=max
+
+      # ── Frontend image ───────────────────────────────────────────────────────
+      - name: Build & push frontend image
+        uses: docker/build-push-action@v5
+        with:
+          context:   ./frontend
+          file:      ./frontend/Dockerfile
+          push:      true
+          tags: |
+            ${{ secrets.DOCKERHUB_USERNAME }}/barbershop-frontend:latest
+            ${{ secrets.DOCKERHUB_USERNAME }}/barbershop-frontend:${{ github.sha }}
+          cache-from: type=gha
+          cache-to:   type=gha,mode=max
+
+  # ────────────────────────────────────────────────────────────────────────────
+  # JOB 5 — Deploy to Render  (only on main branch push)
+  # ────────────────────────────────────────────────────────────────────────────
+  deploy:
+    name: Deploy to Render
+    runs-on: ubuntu-latest
+    needs: build-and-push
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+
+    steps:
+      - name: Trigger Render backend deploy
+        # Render provides a Deploy Hook URL per service
+        # Store it as RENDER_BACKEND_DEPLOY_HOOK in GitHub Secrets
+        run: |
+          curl -s --fail -X POST "${{ secrets.RENDER_BACKEND_DEPLOY_HOOK }}" \
+            -H "Content-Type: application/json" \
+            -d '{"clearCache": false}'
+        env:
+          RENDER_BACKEND_DEPLOY_HOOK: ${{ secrets.RENDER_BACKEND_DEPLOY_HOOK }}
+
+      - name: Trigger Render frontend deploy
+        run: |
+          curl -s --fail -X POST "${{ secrets.RENDER_FRONTEND_DEPLOY_HOOK }}" \
+            -H "Content-Type: application/json" \
+            -d '{"clearCache": false}'
+        env:
+          RENDER_FRONTEND_DEPLOY_HOOK: ${{ secrets.RENDER_FRONTEND_DEPLOY_HOOK }}
+
+      - name: Deployment summary
+        run: |
+          echo "✅ Deployed commit ${{ github.sha }} to Render"
+          echo "🔗 Triggered by: ${{ github.actor }}"

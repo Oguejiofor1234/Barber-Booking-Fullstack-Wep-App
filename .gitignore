@@ -1,0 +1,39 @@
+# Dependencies
+node_modules/
+**/node_modules/
+
+# Environment files (NEVER commit these)
+.env
+.env.local
+.env.production
+**/.env
+**/.env.local
+
+# Build output
+dist/
+build/
+**/dist/
+
+# Prisma generated
+**/prisma/migrations/dev.db
+**/.prisma/
+
+# Uploads (user-generated content)
+backend/uploads/
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Test coverage
+coverage/
+**/coverage/
+
+# Editor
+.vscode/
+.idea/
+*.swp

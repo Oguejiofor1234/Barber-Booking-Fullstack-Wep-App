@@ -1,0 +1,101 @@
+// This is your Prisma schema file
+// Run: npx prisma migrate dev --name init
+
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url=  env("DATABASE_URL")
+}
+
+enum Role {
+  CUSTOMER
+  BARBER
+  ADMIN
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+  COMPLETED
+}
+
+enum MediaType {
+  IMAGE
+  VIDEO
+}
+
+enum NotificationType {
+  EMAIL
+  IN_APP
+}
+
+model User {
+  id           String         @id @default(uuid())
+  name         String
+  email        String         @unique
+  password     String
+  role         Role           @default(CUSTOMER)
+  phone        String?
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+
+  // A customer can have many bookings
+  bookingsAsCustomer Booking[] @relation("CustomerBookings")
+  // A barber can have many bookings assigned
+  bookingsAsBarber   Booking[] @relation("BarberBookings")
+  notifications      Notification[]
+
+  @@map("users")
+}
+
+model Booking {
+  id           String        @id @default(uuid())
+  customerId   String
+  barberId     String
+  dateTime     DateTime
+  endTime      DateTime
+  service      String
+  notes        String?
+  lang         String        @default("en")
+  status       BookingStatus @default(PENDING)
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  customer      User          @relation("CustomerBookings", fields: [customerId], references: [id], onDelete: Cascade)
+  barber        User          @relation("BarberBookings", fields: [barberId], references: [id], onDelete: Cascade)
+  notifications Notification[]
+
+  @@map("bookings")
+}
+
+model GalleryItem {
+  id          String    @id @default(uuid())
+  title       String
+  description String?
+  type        MediaType @default(IMAGE)
+  url         String
+  thumbnail   String?
+  uploadedAt  DateTime  @default(now())
+
+  @@map("gallery_items")
+}
+
+model Notification {
+  id         String           @id @default(uuid())
+  userId     String
+  bookingId  String?
+  message    String
+  type       NotificationType @default(IN_APP)
+  read       Boolean          @default(false)
+  createdAt  DateTime         @default(now())
+
+  user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  booking Booking? @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+
+  @@map("notifications")
+}

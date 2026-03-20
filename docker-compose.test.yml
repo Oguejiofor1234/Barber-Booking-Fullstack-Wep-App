@@ -1,0 +1,40 @@
+version: "3.9"
+
+# ── Isolated test environment ─────────────────────────────────────────────────
+# Usage: docker compose -f docker-compose.test.yml up --build --abort-on-container-exit
+# Spins up a fresh postgres, runs backend tests, then exits.
+
+services:
+
+  postgres_test:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB:       barbershop_test
+      POSTGRES_USER:     postgres
+      POSTGRES_PASSWORD: postgres
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  backend_test:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    depends_on:
+      postgres_test:
+        condition: service_healthy
+    environment:
+      NODE_ENV:      test
+      DATABASE_URL:  postgresql://postgres:postgres@postgres_test:5432/barbershop_test?schema=public
+      JWT_SECRET:    test_jwt_secret
+      SMTP_HOST:     ""
+      SMTP_USER:     ""
+      SMTP_PASS:     ""
+    # Override CMD to run migrations + tests (no server start)
+    command: >
+      sh -c "npx prisma migrate deploy && npm test"
+    volumes:
+      - ./backend/src:/app/src:ro
+      - ./backend/tests:/app/tests:ro
