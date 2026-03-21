@@ -7,10 +7,13 @@ const api = axios.create({
 });
 
 // Response interceptor: auto-handle 401
+// Skip redirect for auth endpoints (login/register return 401 for bad credentials)
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
+    const url = error.config?.url || '';
+    const isAuthEndpoint = url.includes('/auth/login') || url.includes('/auth/register');
+    if (error.response?.status === 401 && !isAuthEndpoint) {
       localStorage.removeItem('token');
       window.location.href = '/login';
     }
