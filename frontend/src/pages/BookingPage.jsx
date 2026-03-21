@@ -167,7 +167,7 @@ export default function BookingPage() {
               slotDuration="01:00:00"
               snapDuration="01:00:00"
               allDaySlot={false}
-              weekends={false}
+              weekends={true}
               height="auto"
             />
           </div>

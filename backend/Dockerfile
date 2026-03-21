@@ -35,5 +35,5 @@ USER appuser
 
 EXPOSE 3001
 
-# Run migrations then start server
-CMD ["sh", "-c", "npx prisma migrate deploy && node src/index.js"]
+# Run migrations, seed, then start server
+CMD ["sh", "-c", "npx prisma migrate deploy && node prisma/seed.js && node src/index.js"]
