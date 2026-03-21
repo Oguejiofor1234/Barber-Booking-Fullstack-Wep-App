@@ -10,7 +10,7 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-const FROM = `"${process.env.SHOP_NAME || 'JP Barber Shop'}" <${process.env.SMTP_USER}>`;
+const FROM = `"${process.env.SHOP_NAME || 'JP Barber Shop'}" <${process.env.SMTP_FROM || process.env.SMTP_USER}>`;
 const TIMEZONE = process.env.SHOP_TIMEZONE || 'America/Toronto';
 
 // Skip sending if SMTP is not configured
