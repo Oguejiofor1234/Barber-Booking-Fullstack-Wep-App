@@ -1,9 +1,9 @@
 const nodemailer = require('nodemailer');
 
 const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST || 'smtp.gmail.com',
+  host: process.env.SMTP_HOST || 'smtp-relay.brevo.com',
   port: parseInt(process.env.SMTP_PORT || '587'),
-  secure: false, // TLS
+  secure: false,
   auth: {
     user: process.env.SMTP_USER,
     pass: process.env.SMTP_PASS,
@@ -13,7 +13,7 @@ const transporter = nodemailer.createTransport({
 const FROM = `"${process.env.SHOP_NAME || 'JP Barber Shop'}" <${process.env.SMTP_USER}>`;
 const TIMEZONE = process.env.SHOP_TIMEZONE || 'America/Toronto';
 
-// Skip sending if SMTP is not configured (test / dev environments)
+// Skip sending if SMTP is not configured
 const smtpEnabled = () => !!(process.env.SMTP_USER && process.env.SMTP_PASS);
 
 /**
@@ -107,7 +107,7 @@ const sendBookingStatusToCustomer = async ({ customerEmail, customerName, servic
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Barber emails — always in English (internal staff)
+// Barber emails
 // ─────────────────────────────────────────────────────────────────────────────
 const sendCancellationToBarber = async ({ barberEmail, barberName, customerName, service, dateTime }) => {
   if (!smtpEnabled()) return;
