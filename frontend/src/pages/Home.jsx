@@ -30,26 +30,36 @@ const HOURS = [
   { day: 'Sunday',    open: null,       close: null        },
 ];
 
+// Same service values as BookingPage — single source of truth
+const SERVICE_DEFS = [
+  { label: 'Classic Haircut',      price: '$25', desc: 'Precision cut tailored to your style. Fades, tapers, textured cuts & more.' },
+  { label: 'Beard Trim & Shape',   price: '$20', desc: 'Expert shaping and grooming for a clean, defined beard.' },
+  { label: 'Hot Towel Shave',      price: '$35', desc: 'Traditional straight-razor shave with hot towel treatment.' },
+  { label: 'Cut + Beard Combo',    price: '$40', desc: 'Complete grooming package — haircut plus beard shaping.' },
+  { label: 'Hair Treatment',       price: '$30', desc: 'Deep conditioning, scalp massage, and moisturizing treatment.' },
+  { label: 'Kids Haircut',         price: '$18', desc: 'Fun, patient service for boys aged 2–12.' },
+];
+
+const CLIENTS_POOL = [
+  ['S','M','J','B','T','A','C'],
+  ['D','E','F','G','H','I','K'],
+  ['L','N','O','P','Q','R','U'],
+  ['V','W','X','Y','Z','1','2'],
+  ['3','4','5','S','M','J','B'],
+  ['T','A','C','D','E','F','G'],
+];
+
+const makeServices = (barberName) =>
+  SERVICE_DEFS.map((s, i) => ({
+    name: `${s.label} — ${barberName}`,
+    desc: s.desc,
+    price: s.price,
+    clients: CLIENTS_POOL[i],
+  }));
+
 const BARBER_SECTIONS = [
-  {
-    id: 'jp', name: 'J.P', initial: 'J', color: 'bg-blue-600',
-    services: [
-      { name: 'Precision Haircut — J.P',        desc: 'Precision cut tailored to your style. Fades, tapers & textured cuts.', price: '$50', clients: ['S','M','J','B','T','A','C'] },
-      { name: 'Haircut & Beard — J.P',           desc: 'Full grooming package — precision haircut plus beard shaping.',         price: '$65', clients: ['D','E','F','G','H','I','K'] },
-      { name: 'Beard / Outline — J.P',           desc: 'Sharp beard line-up and edge definition for a clean, defined look.',    price: '$25', clients: ['L','N','O','P','Q','R','U'] },
-      { name: 'Monday After-Work Haircut — J.P', desc: 'Quick precise after-work cut. Walk-in friendly on Mondays.',           price: '$40', clients: ['V','W','X','Y','Z','1','2'] },
-      { name: 'Hot Towel Shave — J.P',           desc: 'Traditional straight-razor shave with hot towel treatment.',           price: '$35', clients: ['3','4','5','S','M','J','B'] },
-      { name: 'Kids Haircut — J.P',              desc: 'Fun, patient service for boys aged 2–12.',                             price: '$18', clients: ['T','A','C','D','E','F','G'] },
-    ],
-  },
-  {
-    id: 'admin', name: 'Admin', initial: 'A', color: 'bg-emerald-600',
-    services: [
-      { name: 'Haircut — Admin',         desc: 'Classic and modern cuts — fades, crops, and waves by Admin.',      price: '$40', clients: ['H','I','K','L','N','O','P'] },
-      { name: 'Haircut & Beard — Admin', desc: 'Complete grooming: haircut and beard trim by Admin.',               price: '$60', clients: ['Q','R','U','V','W','X','Y'] },
-      { name: 'Beard / Outline — Admin', desc: 'Clean beard line-up, edge-up, and shaping by Admin.',               price: '$25', clients: ['Z','1','2','3','4','5','S'] },
-    ],
-  },
+  { id: 'jp',    name: 'J.P',   initial: 'J', color: 'bg-blue-600',    services: makeServices('J.P')   },
+  { id: 'admin', name: 'Admin', initial: 'A', color: 'bg-emerald-600', services: makeServices('Admin') },
 ];
 
 const INITIAL_REVIEWS = [
