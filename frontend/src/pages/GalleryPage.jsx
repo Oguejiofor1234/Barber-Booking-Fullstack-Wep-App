@@ -145,10 +145,14 @@ export default function GalleryPage() {
               <div key={item.id} className="card group relative aspect-square">
                 {item.type === 'VIDEO' ? (
                   <video
-                    src={item.url}
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-cover cursor-pointer"
                     onClick={() => setLightbox(item)}
-                  />
+                    muted
+                    playsInline
+                  >
+                    <source src={item.url} type="video/mp4" />
+                    <source src={item.url} type="video/webm" />
+                  </video>
                 ) : (
                   <img
                     src={item.url}
@@ -207,8 +211,13 @@ export default function GalleryPage() {
             ✕
           </button>
           <div className="max-w-4xl w-full" onClick={e => e.stopPropagation()}>
-            {lightbox.type === 'VIDEO' ? (
-              <video src={lightbox.url} controls autoPlay className="w-full rounded-xl max-h-[80vh]" />
+          {lightbox.type === 'VIDEO' ? (
+              <video controls autoPlay className="w-full rounded-xl max-h-[80vh]">
+                <source src={lightbox.url} type="video/mp4" />
+                <source src={lightbox.url} type="video/webm" />
+                <source src={lightbox.url} type="video/quicktime" />
+                Your browser does not support this video format.
+              </video>
             ) : (
               <img src={lightbox.url} alt={lightbox.title} className="w-full rounded-xl max-h-[80vh] object-contain" />
             )}

@@ -40,8 +40,15 @@ const apiLimiter = rateLimit({
 app.use('/api/auth', authLimiter);
 app.use('/api/', apiLimiter);
 
-// Serve uploaded files statically
-app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
+// Serve uploaded files statically — with explicit MIME types for video
+app.use('/uploads', express.static(path.join(__dirname, '../uploads'), {
+  setHeaders: (res, filePath) => {
+    if (filePath.endsWith('.mp4'))  res.setHeader('Content-Type', 'video/mp4');
+    if (filePath.endsWith('.webm')) res.setHeader('Content-Type', 'video/webm');
+    if (filePath.endsWith('.mov'))  res.setHeader('Content-Type', 'video/quicktime');
+    if (filePath.endsWith('.avi'))  res.setHeader('Content-Type', 'video/x-msvideo');
+  },
+}));
 
 // ─── Routes ──────────────────────────────────────────────────────────────────
 app.use('/api/auth', authRoutes);
