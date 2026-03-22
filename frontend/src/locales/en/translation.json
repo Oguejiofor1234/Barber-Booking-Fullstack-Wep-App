@@ -70,18 +70,24 @@
     }
   },
   "booking": {
-    "title":    "Book Your Appointment",
-    "subtitle": "Click a time slot on the calendar to select it, then fill in the form below.",
+    "title":       "Book Your Appointment",
+    "pageTitle":   "Book Appointment",
+    "selectBarber":"Select barber",
+    "tabs": {
+      "morning":   "Morning",
+      "afternoon": "Afternoon",
+      "evening":   "Evening"
+    },
+    "noSlots":   "No slots available",
+    "staff":     "Staff:",
+    "totalTax":  "Total (Includes tax: ${{tax}}) :",
+    "continue":  "Continue",
     "form": {
-      "title":            "New Booking",
-      "selected":         "Selected:",
-      "barberLabel":      "Barber *",
-      "barberPlaceholder":"Select a barber...",
-      "serviceLabel":     "Service *",
-      "notesLabel":       "Notes (optional)",
-      "notesPlaceholder": "Any special requests...",
-      "submit":           "Book Appointment",
-      "submitting":       "Booking..."
+      "barberLabel":       "Barber",
+      "barberPlaceholder": "Select a barber",
+      "serviceLabel":      "Service",
+      "submit":            "Book Appointment",
+      "submitting":        "Booking..."
     },
     "myBookings": {
       "title": "My Bookings",
@@ -89,11 +95,9 @@
       "cancel": "Cancel"
     },
     "toast": {
-      "pastDate":   "Cannot book in the past!",
-      "slotSelected":"Time slot selected!",
-      "noDate":     "Please select a date/time on the calendar",
-      "noBarber":   "Please select a barber",
-      "success":    "Booking submitted! You will receive a confirmation email.",
+      "noSlot":        "Please select a time slot",
+      "noBarber":      "Please select a barber",
+      "success":       "Booking confirmed!",
       "cancelConfirm": "Cancel this booking?",
       "cancelSuccess": "Booking cancelled"
     }

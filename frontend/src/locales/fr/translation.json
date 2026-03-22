@@ -70,18 +70,24 @@
     }
   },
   "booking": {
-    "title":    "Réserver votre Rendez-vous",
-    "subtitle": "Cliquez sur un créneau horaire dans le calendrier pour le sélectionner, puis remplissez le formulaire ci-dessous.",
+    "title":       "Réserver votre Rendez-vous",
+    "pageTitle":   "Prendre Rendez-vous",
+    "selectBarber":"Choisir un barbier",
+    "tabs": {
+      "morning":   "Matin",
+      "afternoon": "Après-midi",
+      "evening":   "Soir"
+    },
+    "noSlots":   "Aucun créneau disponible",
+    "staff":     "Personnel :",
+    "totalTax":  "Total (Taxes incluses : {{tax}}$) :",
+    "continue":  "Continuer",
     "form": {
-      "title":            "Nouvelle Réservation",
-      "selected":         "Sélectionné :",
-      "barberLabel":      "Barbier *",
-      "barberPlaceholder":"Choisir un barbier...",
-      "serviceLabel":     "Service *",
-      "notesLabel":       "Notes (optionnel)",
-      "notesPlaceholder": "Demandes spéciales...",
-      "submit":           "Prendre Rendez-vous",
-      "submitting":       "Réservation..."
+      "barberLabel":       "Barbier",
+      "barberPlaceholder": "Choisir un barbier",
+      "serviceLabel":      "Service",
+      "submit":            "Prendre Rendez-vous",
+      "submitting":        "Réservation..."
     },
     "myBookings": {
       "title": "Mes Réservations",
@@ -89,11 +95,9 @@
       "cancel": "Annuler"
     },
     "toast": {
-      "pastDate":      "Impossible de réserver dans le passé !",
-      "slotSelected":  "Créneau horaire sélectionné !",
-      "noDate":        "Veuillez sélectionner une date/heure sur le calendrier",
+      "noSlot":        "Veuillez sélectionner un créneau horaire",
       "noBarber":      "Veuillez sélectionner un barbier",
-      "success":       "Réservation soumise ! Vous recevrez un e-mail de confirmation.",
+      "success":       "Réservation confirmée !",
       "cancelConfirm": "Annuler cette réservation ?",
       "cancelSuccess": "Réservation annulée"
     }

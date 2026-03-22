@@ -1,13 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import FullCalendar from '@fullcalendar/react';
-import dayGridPlugin from '@fullcalendar/daygrid';
-import timeGridPlugin from '@fullcalendar/timegrid';
-import interactionPlugin from '@fullcalendar/interaction';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import toast from 'react-hot-toast';
 import api from '../utils/api';
 
-// English values are stored in the DB; only display labels are translated
+// ── Constants ─────────────────────────────────────────────────────────────────
 const SERVICE_VALUES = [
   'Classic Haircut ($25)',
   'Beard Trim & Shape ($20)',
@@ -16,7 +12,11 @@ const SERVICE_VALUES = [
   'Hair Treatment ($30)',
   'Kids Haircut ($18)',
 ];
-const SERVICE_PRICES = ['$25', '$20', '$35', '$40', '$30', '$18'];
+
+const TAX_RATE = 0.13;
+const DAYS     = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+const MONTHS   = ['January','February','March','April','May','June',
+                  'July','August','September','October','November','December'];
 
 const STATUS_COLORS = {
   PENDING:   'bg-yellow-100 text-yellow-800 border-yellow-200',
@@ -25,105 +25,109 @@ const STATUS_COLORS = {
   COMPLETED: 'bg-blue-100   text-blue-800   border-blue-200',
 };
 
+// ── Helpers ───────────────────────────────────────────────────────────────────
+const generateSlots = (date) => {
+  const slots = [];
+  for (let hour = 9; hour < 19; hour++)
+    for (const min of [0, 30]) {
+      const d = new Date(date); d.setHours(hour, min, 0, 0); slots.push(d);
+    }
+  return slots;
+};
+
+const getCategory = (date) => {
+  const h = date.getHours();
+  if (h < 12) return 'Morning';
+  if (h < 17) return 'Afternoon';
+  return 'Evening';
+};
+
+const fmt = (date) =>
+  date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+
+const extractPrice = (svc) => { const m = svc.match(/\$(\d+)/); return m ? parseInt(m[1]) : 0; };
+
+// ── Component ─────────────────────────────────────────────────────────────────
 export default function BookingPage() {
   const { t, i18n } = useTranslation();
-  const serviceLabels = t('services.items', { returnObjects: true });
-  const SERVICE_OPTIONS = SERVICE_VALUES.map((value, i) => ({
-    value,
-    label: `${serviceLabels[i].name} (${SERVICE_PRICES[i]})`,
-  }));
 
-  const STATUS_LABELS = {
-    PENDING:   t('dashboard.status.PENDING'),
-    CONFIRMED: t('dashboard.status.CONFIRMED'),
-    CANCELLED: t('dashboard.status.CANCELLED'),
-    COMPLETED: t('dashboard.status.COMPLETED'),
-  };
-
-  const [barbers,       setBarbers]       = useState([]);
-  const [bookings,      setBookings]      = useState([]);
-  const [allSlots,      setAllSlots]      = useState([]);
-  const [form, setForm] = useState({ barberId: '', service: SERVICE_VALUES[0], notes: '' });
-  const [selectedDate, setSelectedDate] = useState(null);
-  const [loading, setLoading] = useState(false);
+  const [barbers,      setBarbers]      = useState([]);
+  const [bookings,     setBookings]     = useState([]);
+  const [calSlots,     setCalSlots]     = useState([]);
+  const [barberId,     setBarberId]     = useState('');
+  const [service,      setService]      = useState(SERVICE_VALUES[0]);
+  const [weekOffset,   setWeekOffset]   = useState(0);
+  const [selectedDate, setSelectedDate] = useState(() => { const d = new Date(); d.setHours(0,0,0,0); return d; });
+  const [selectedTime, setSelectedTime] = useState(null);
+  const [timeTab,      setTimeTab]      = useState('Morning');
+  const [loading,      setLoading]      = useState(false);
 
   useEffect(() => {
-    api.get('/auth/barbers').then(r => setBarbers(r.data)).catch(() => {});
+    api.get('/auth/barbers').then(r => {
+      setBarbers(r.data);
+      if (r.data.length > 0) setBarberId(r.data[0].id);
+    }).catch(() => {});
     fetchBookings();
-    fetchAllSlots();
+    fetchCalendar();
   }, []);
 
   const fetchBookings = async () => {
-    try {
-      const { data } = await api.get('/bookings');
-      setBookings(data);
-    } catch {}
+    try { const { data } = await api.get('/bookings'); setBookings(data); } catch {}
+  };
+  const fetchCalendar = async () => {
+    try { const { data } = await api.get('/bookings/calendar'); setCalSlots(data); } catch {}
   };
 
-  const fetchAllSlots = async () => {
-    try {
-      const { data } = await api.get('/bookings/calendar');
-      setAllSlots(data);
-    } catch {}
-  };
+  const visibleDates = useMemo(() => {
+    const today = new Date(); today.setHours(0,0,0,0);
+    return Array.from({ length: 7 }, (_, i) => {
+      const d = new Date(today); d.setDate(today.getDate() + weekOffset * 7 + i); return d;
+    });
+  }, [weekOffset]);
 
-  // Convert bookings to FullCalendar events
-  const calendarEvents = allSlots.map(b => ({
-    id: b.id,
-    title: `${b.service} — ${b.status}`,
-    start: b.dateTime,
-    end: b.endTime,
-    backgroundColor:
-      b.status === 'CONFIRMED' ? '#16a34a' :
-      b.status === 'CANCELLED' ? '#dc2626' :
-      b.status === 'PENDING'   ? '#ca8a04' : '#2563eb',
-    borderColor: 'transparent',
-  }));
+  const rangeLabel = useMemo(() => {
+    const a = visibleDates[0], b = visibleDates[6];
+    return a.getMonth() === b.getMonth()
+      ? `${MONTHS[a.getMonth()]} ${a.getFullYear()}`
+      : `${MONTHS[a.getMonth()]} - ${MONTHS[b.getMonth()]} ${b.getFullYear()}`;
+  }, [visibleDates]);
 
-  const handleDateSelect = (selectInfo) => {
+  const timeSlots = useMemo(() => {
     const now = new Date();
-    if (selectInfo.start < now) {
-      toast.error(t('booking.toast.pastDate'));
-      return;
-    }
-    setSelectedDate(selectInfo.start.toISOString());
-  };
+    return generateSlots(selectedDate).map(slot => {
+      if (slot <= now) return { time: slot, available: false };
+      const booked = calSlots.some(b => {
+        if (barberId && b.barber?.id !== barberId) return false;
+        return slot >= new Date(b.dateTime) && slot < new Date(b.endTime);
+      });
+      return { time: slot, available: !booked };
+    });
+  }, [selectedDate, calSlots, barberId]);
 
-  // Single click on a time slot
-  const handleDateClick = (clickInfo) => {
-    const now = new Date();
-    if (clickInfo.date < now) {
-      toast.error(t('booking.toast.pastDate'));
-      return;
-    }
-    setSelectedDate(clickInfo.date.toISOString());
-    toast.success(t('booking.toast.slotSelected'));
-  };
+  const filteredSlots = useMemo(() =>
+    timeSlots.filter(s => getCategory(s.time) === timeTab), [timeSlots, timeTab]);
 
-  const handleBook = async (e) => {
-    e.preventDefault();
-    if (!selectedDate)  return toast.error(t('booking.toast.noDate'));
-    if (!form.barberId) return toast.error(t('booking.toast.noBarber'));
+  const price   = extractPrice(service);
+  const tax     = Math.round(price * TAX_RATE * 100) / 100;
+  const total   = price + tax;
+  const endTime = selectedTime ? new Date(selectedTime.getTime() + 60 * 60 * 1000) : null;
+  const barber  = barbers.find(b => b.id === barberId);
 
+  const handleBook = async () => {
+    if (!selectedTime) return toast.error(t('booking.toast.noSlot'));
+    if (!barberId)     return toast.error(t('booking.toast.noBarber'));
     setLoading(true);
     try {
       await api.post('/bookings', {
-        barberId: form.barberId,
-        dateTime: selectedDate,
-        service:  form.service,
-        notes:    form.notes,
-        lang:     i18n.language?.startsWith('fr') ? 'fr' : 'en',
+        barberId, dateTime: selectedTime.toISOString(), service,
+        lang: i18n.language?.startsWith('fr') ? 'fr' : 'en',
       });
       toast.success(t('booking.toast.success'));
-      setSelectedDate(null);
-      setForm(prev => ({ ...prev, notes: '' }));
-      fetchBookings();
-      fetchAllSlots();
+      setSelectedTime(null);
+      fetchBookings(); fetchCalendar();
     } catch (err) {
       toast.error(err.response?.data?.error || 'Booking failed');
-    } finally {
-      setLoading(false);
-    }
+    } finally { setLoading(false); }
   };
 
   const cancelBooking = async (id) => {
@@ -131,135 +135,172 @@ export default function BookingPage() {
     try {
       await api.patch(`/bookings/${id}/status`, { status: 'CANCELLED' });
       toast.success(t('booking.toast.cancelSuccess'));
-      fetchBookings();
-      fetchAllSlots();
-    } catch (err) {
-      toast.error(err.response?.data?.error || 'Failed to cancel');
-    }
+      fetchBookings(); fetchCalendar();
+    } catch (err) { toast.error(err.response?.data?.error || 'Failed to cancel'); }
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12">
-      <div className="max-w-7xl mx-auto px-6 lg:px-8">
-        <div className="mb-10">
-          <h1 className="section-title">{t('booking.title')}</h1>
-          <p className="text-gray-500">{t('booking.subtitle')}</p>
+    <div className="min-h-screen bg-gray-50 py-8">
+      <div className="max-w-2xl mx-auto px-4 space-y-4">
+
+        <h1 className="text-2xl font-bold text-gray-900">{t('booking.pageTitle')}</h1>
+
+        {/* Barber + Service */}
+        <div className="bg-white rounded-2xl shadow-sm p-5 grid grid-cols-2 gap-4">
+          <div>
+            <label className="block text-xs font-semibold text-gray-500 mb-1 uppercase tracking-wide">{t('booking.form.barberLabel')}</label>
+            <select className="input-field" value={barberId}
+              onChange={e => { setBarberId(e.target.value); setSelectedTime(null); }}>
+              <option value="">{t('booking.form.barberPlaceholder')}</option>
+              {barbers.map(b => <option key={b.id} value={b.id}>{b.name}</option>)}
+            </select>
+          </div>
+          <div>
+            <label className="block text-xs font-semibold text-gray-500 mb-1 uppercase tracking-wide">{t('booking.form.serviceLabel')}</label>
+            <select className="input-field" value={service}
+              onChange={e => { setService(e.target.value); setSelectedTime(null); }}>
+              {SERVICE_VALUES.map(s => <option key={s} value={s}>{s}</option>)}
+            </select>
+          </div>
         </div>
 
-        <div className="grid lg:grid-cols-3 gap-8">
-          {/* Calendar */}
-          <div className="lg:col-span-2 bg-white rounded-2xl shadow-md p-6">
-            <FullCalendar
-              plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
-              initialView="timeGridWeek"
-              headerToolbar={{
-                left:   'prev,next today',
-                center: 'title',
-                right:  'dayGridMonth,timeGridWeek,timeGridDay',
-              }}
-              selectable
-              selectMirror
-              select={handleDateSelect}
-              dateClick={handleDateClick}
-              events={calendarEvents}
-              slotMinTime="09:00:00"
-              slotMaxTime="19:00:00"
-              slotDuration="01:00:00"
-              snapDuration="01:00:00"
-              allDaySlot={false}
-              weekends={true}
-              height="auto"
-            />
+        {/* Date Picker */}
+        <div className="bg-white rounded-2xl shadow-sm p-5">
+          <div className="flex items-center justify-between mb-5">
+            <button onClick={() => { setWeekOffset(w => Math.max(0, w-1)); setSelectedTime(null); }}
+              disabled={weekOffset === 0}
+              className="w-9 h-9 flex items-center justify-center rounded-full hover:bg-gray-100 disabled:opacity-30 text-2xl text-gray-600">
+              ‹
+            </button>
+            <span className="font-semibold text-gray-800">{rangeLabel}</span>
+            <button onClick={() => { setWeekOffset(w => w+1); setSelectedTime(null); }}
+              className="w-9 h-9 flex items-center justify-center rounded-full hover:bg-gray-100 text-2xl text-gray-600">
+              ›
+            </button>
           </div>
-
-          {/* Booking Form */}
-          <div className="space-y-6">
-            <div className="bg-white rounded-2xl shadow-md p-6">
-              <h2 className="text-xl font-serif font-bold mb-6 text-dark-800">{t('booking.form.title')}</h2>
-
-              {selectedDate && (
-                <div className="bg-primary-50 border border-primary-200 rounded-lg p-3 mb-4 text-sm text-primary-700">
-                  <strong>{t('booking.form.selected')}</strong> {new Date(selectedDate).toLocaleString(i18n.language?.startsWith('fr') ? 'fr-FR' : 'en-US', { timeZone: 'America/Toronto', weekday: 'short', year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
-                </div>
-              )}
-
-              <form onSubmit={handleBook} className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">{t('booking.form.barberLabel')}</label>
-                  <select
-                    className="input-field"
-                    value={form.barberId}
-                    onChange={e => setForm(prev => ({ ...prev, barberId: e.target.value }))}
-                    required
-                  >
-                    <option value="">{t('booking.form.barberPlaceholder')}</option>
-                    {barbers.map(b => (
-                      <option key={b.id} value={b.id}>{b.name}</option>
-                    ))}
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">{t('booking.form.serviceLabel')}</label>
-                  <select
-                    className="input-field"
-                    value={form.service}
-                    onChange={e => setForm(prev => ({ ...prev, service: e.target.value }))}
-                  >
-                    {SERVICE_OPTIONS.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">{t('booking.form.notesLabel')}</label>
-                  <textarea
-                    className="input-field resize-none"
-                    rows={3}
-                    placeholder={t('booking.form.notesPlaceholder')}
-                    value={form.notes}
-                    onChange={e => setForm(prev => ({ ...prev, notes: e.target.value }))}
-                  />
-                </div>
-
-                <button type="submit" disabled={loading} className="btn-primary w-full">
-                  {loading ? t('booking.form.submitting') : t('booking.form.submit')}
+          <div className="flex gap-2 overflow-x-auto pb-1">
+            {visibleDates.map(d => {
+              const isSel   = d.toDateString() === selectedDate.toDateString();
+              const isToday = d.toDateString() === new Date().toDateString();
+              return (
+                <button key={d.toISOString()}
+                  onClick={() => { setSelectedDate(d); setSelectedTime(null); }}
+                  className={`flex-shrink-0 flex flex-col items-center w-14 py-3 rounded-2xl transition-all ${
+                    isSel ? 'bg-blue-600 text-white shadow-md' : 'bg-gray-50 text-gray-700 hover:bg-gray-100'
+                  }`}>
+                  <span className="text-xs font-medium">{DAYS[d.getDay()]}</span>
+                  <span className="text-xl font-bold mt-0.5">{d.getDate()}</span>
+                  <span className={`mt-1.5 w-5 h-1 rounded-full ${
+                    isSel ? 'bg-blue-400' : isToday ? 'bg-blue-500' : 'bg-transparent'
+                  }`} />
                 </button>
-              </form>
-            </div>
-
-            {/* My Bookings */}
-            <div className="bg-white rounded-2xl shadow-md p-6">
-              <h2 className="text-lg font-serif font-bold mb-4 text-dark-800">{t('booking.myBookings.title')}</h2>
-              {bookings.length === 0 ? (
-                <p className="text-gray-400 text-sm">{t('booking.myBookings.empty')}</p>
-              ) : (
-                <div className="space-y-3 max-h-96 overflow-y-auto">
-                  {bookings.map(b => (
-                    <div key={b.id} className="border rounded-xl p-4">
-                      <div className="flex items-start justify-between gap-2 mb-2">
-                        <p className="font-semibold text-sm text-gray-800">{b.service}</p>
-                        <span className={`text-xs px-2 py-1 rounded-full border font-medium ${STATUS_COLORS[b.status]}`}>
-                          {STATUS_LABELS[b.status] || b.status}
-                        </span>
-                      </div>
-                      <p className="text-xs text-gray-500">
-                        {new Date(b.dateTime).toLocaleString(i18n.language?.startsWith('fr') ? 'fr-FR' : 'en-US', { timeZone: 'America/Toronto', weekday: 'short', year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })} · {b.barber?.name}
-                      </p>
-                      {b.status === 'PENDING' || b.status === 'CONFIRMED' ? (
-                        <button
-                          onClick={() => cancelBooking(b.id)}
-                          className="mt-2 text-xs text-red-500 hover:underline"
-                        >
-                          {t('booking.myBookings.cancel')}
-                        </button>
-                      ) : null}
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
+              );
+            })}
           </div>
         </div>
+
+        {/* Time Slots */}
+        <div className="bg-white rounded-2xl shadow-sm p-5">
+          <div className="flex gap-1 bg-gray-100 rounded-xl p-1 mb-5">
+            {[
+              { key: 'Morning',   label: t('booking.tabs.morning') },
+              { key: 'Afternoon', label: t('booking.tabs.afternoon') },
+              { key: 'Evening',   label: t('booking.tabs.evening') },
+            ].map(({ key, label }) => (
+              <button key={key} onClick={() => { setTimeTab(key); setSelectedTime(null); }}
+                className={`flex-1 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  timeTab === key ? 'bg-white shadow text-gray-900' : 'text-gray-500 hover:text-gray-700'
+                }`}>{label}</button>
+            ))}
+          </div>
+          {filteredSlots.length === 0 ? (
+            <p className="text-center text-gray-400 text-sm py-6">{t('booking.noSlots')}</p>
+          ) : (
+            <div className="flex flex-wrap gap-2">
+              {filteredSlots.map(({ time, available }) => {
+                const isSel = selectedTime?.toISOString() === time.toISOString();
+                return (
+                  <button key={time.toISOString()} disabled={!available}
+                    onClick={() => setSelectedTime(isSel ? null : time)}
+                    className={`px-4 py-2.5 rounded-xl text-sm font-medium transition-all ${
+                      !available ? 'bg-gray-100 text-gray-300 cursor-not-allowed'
+                      : isSel    ? 'bg-blue-600 text-white shadow-md'
+                                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    }`}>{fmt(time)}</button>
+                );
+              })}
+            </div>
+          )}
+        </div>
+
+        {/* Booking Summary */}
+        {selectedTime && (
+          <div className="bg-white rounded-2xl shadow-sm p-5 space-y-3">
+            <div className="flex items-start justify-between">
+              <div>
+                <p className="font-semibold text-gray-900">
+                  {service.replace(/\s*\(\$\d+\)/, '')} — {barber?.name}
+                </p>
+                <p className="text-sm text-gray-500 mt-0.5">{fmt(selectedTime)} – {fmt(endTime)}</p>
+              </div>
+              <p className="font-bold text-gray-900">${price}.00</p>
+            </div>
+            {barber && (
+              <div className="flex items-center gap-2 pt-3 border-t border-gray-100">
+                <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 font-bold text-sm">
+                  {barber.name[0]}
+                </div>
+                <span className="text-sm text-gray-600">{t('booking.staff')} <strong>{barber.name}</strong></span>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Total + Continue */}
+        {selectedTime && (
+          <div className="bg-white rounded-2xl shadow-sm p-5">
+            <div className="flex items-center justify-between mb-4">
+              <span className="text-sm text-gray-500">{t('booking.totalTax', { tax: tax.toFixed(2) })}</span>
+              <span className="text-2xl font-bold text-gray-900">${total.toFixed(2)}</span>
+            </div>
+            <button onClick={handleBook} disabled={loading}
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-4 rounded-xl transition-colors disabled:opacity-50 text-base">
+              {loading ? t('booking.form.submitting') : t('booking.continue')}
+            </button>
+          </div>
+        )}
+
+        {/* My Bookings */}
+        <div className="bg-white rounded-2xl shadow-sm p-5">
+          <h2 className="font-semibold text-gray-900 mb-4">{t('booking.myBookings.title')}</h2>
+          {bookings.length === 0 ? (
+            <p className="text-gray-400 text-sm">{t('booking.myBookings.empty')}</p>
+          ) : (
+            <div className="space-y-3">
+              {bookings.map(b => (
+                <div key={b.id} className="border border-gray-100 rounded-xl p-4">
+                  <div className="flex items-start justify-between gap-2 mb-1">
+                    <p className="font-medium text-sm text-gray-800">{b.service}</p>
+                    <span className={`text-xs px-2 py-0.5 rounded-full border font-medium flex-shrink-0 ${STATUS_COLORS[b.status]}`}>
+                      {b.status}
+                    </span>
+                  </div>
+                  <p className="text-xs text-gray-500">
+                    {new Date(b.dateTime).toLocaleString('en-US', {
+                      timeZone: 'America/Toronto', weekday: 'short',
+                      month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit',
+                    })} · {b.barber?.name}
+                  </p>
+                  {(b.status === 'PENDING' || b.status === 'CONFIRMED') && (
+                    <button onClick={() => cancelBooking(b.id)}
+                      className="mt-2 text-xs text-red-500 hover:underline">{t('booking.myBookings.cancel')}</button>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
       </div>
     </div>
   );
