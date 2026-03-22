@@ -4,6 +4,7 @@ import toast from 'react-hot-toast';
 import api from '../utils/api';
 
 // ── Constants ─────────────────────────────────────────────────────────────────
+// Values stored in DB (English) — display labels can be translated
 const SERVICE_VALUES = [
   'Classic Haircut ($25)',
   'Beard Trim & Shape ($20)',
@@ -11,6 +12,15 @@ const SERVICE_VALUES = [
   'Cut + Beard Combo ($40)',
   'Hair Treatment ($30)',
   'Kids Haircut ($18)',
+];
+
+const SERVICE_LABELS_FR = [
+  'Coupe Classique ($25)',
+  'Taille & Mise en Forme ($20)',
+  'Rasage à la Serviette Chaude ($35)',
+  'Combo Coupe + Barbe ($40)',
+  'Traitement Capillaire ($30)',
+  'Coupe Enfant ($18)',
 ];
 
 const TAX_RATE = 0.13;
@@ -50,6 +60,7 @@ const extractPrice = (svc) => { const m = svc.match(/\$(\d+)/); return m ? parse
 // ── Component ─────────────────────────────────────────────────────────────────
 export default function BookingPage() {
   const { t, i18n } = useTranslation();
+  const fr = i18n.language?.startsWith('fr');
 
   const [barbers,      setBarbers]      = useState([]);
   const [bookings,     setBookings]     = useState([]);
@@ -159,7 +170,7 @@ export default function BookingPage() {
             <label className="block text-xs font-semibold text-gray-500 mb-1 uppercase tracking-wide">{t('booking.form.serviceLabel')}</label>
             <select className="input-field" value={service}
               onChange={e => { setService(e.target.value); setSelectedTime(null); }}>
-              {SERVICE_VALUES.map(s => <option key={s} value={s}>{s}</option>)}
+              {SERVICE_VALUES.map((s, i) => <option key={s} value={s}>{fr ? SERVICE_LABELS_FR[i] : s}</option>)}
             </select>
           </div>
         </div>
