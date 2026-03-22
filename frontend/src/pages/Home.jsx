@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
 
 const MAIN_PHOTO  = '/images/JP_barber.jpg';
@@ -42,11 +43,11 @@ const BARBER_SECTIONS = [
     ],
   },
   {
-    id: 'roland', name: 'Roland', initial: 'R', color: 'bg-emerald-600',
+    id: 'admin', name: 'Admin', initial: 'A', color: 'bg-emerald-600',
     services: [
-      { name: 'Haircut — Roland',         desc: 'Classic and modern cuts — fades, crops, and waves by Roland.',      price: '$40', clients: ['H','I','K','L','N','O','P'] },
-      { name: 'Haircut & Beard — Roland', desc: 'Complete grooming: haircut and beard trim by Roland.',               price: '$60', clients: ['Q','R','U','V','W','X','Y'] },
-      { name: 'Beard / Outline — Roland', desc: 'Clean beard line-up, edge-up, and shaping by Roland.',               price: '$25', clients: ['Z','1','2','3','4','5','S'] },
+      { name: 'Haircut — Admin',         desc: 'Classic and modern cuts — fades, crops, and waves by Admin.',      price: '$40', clients: ['H','I','K','L','N','O','P'] },
+      { name: 'Haircut & Beard — Admin', desc: 'Complete grooming: haircut and beard trim by Admin.',               price: '$60', clients: ['Q','R','U','V','W','X','Y'] },
+      { name: 'Beard / Outline — Admin', desc: 'Clean beard line-up, edge-up, and shaping by Admin.',               price: '$25', clients: ['Z','1','2','3','4','5','S'] },
     ],
   },
 ];
@@ -100,7 +101,12 @@ const ALL_PHOTOS = [
 
 export default function Home() {
   const { isAuthenticated } = useAuth();
+  const { i18n } = useTranslation();
+  const fr = i18n.language?.startsWith('fr');
   const bookLink = isAuthenticated ? '/booking' : '/register';
+
+  // Simple FR/EN helper
+  const tx = (en, frText) => fr ? frText : en;
 
   const [reviews,        setReviews]        = useState(INITIAL_REVIEWS);
   const [showFullWeek,   setShowFullWeek]   = useState(false);
@@ -457,7 +463,7 @@ export default function Home() {
             <div className="h-40 bg-gray-200 overflow-hidden">
               <iframe
                 title="JP Barber Studio location"
-                src="https://maps.google.com/maps?q=3095+Argentia+Rd+Mississauga+ON&output=embed"
+                src="https://maps.google.com/maps?q=13008+Boul+Henri-Bourassa+Quebec+QC+G1G+3Y4&output=embed"
                 width="100%"
                 height="100%"
                 style={{ border: 0 }}
@@ -466,6 +472,25 @@ export default function Home() {
               />
             </div>
 
+            {/* Address card with directions arrow */}
+            <a
+              href="https://www.google.com/maps/dir/?api=1&destination=13008+Boul+Henri-Bourassa+Quebec+QC+G1G+3Y4"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-3 px-4 py-3 bg-white border-b border-gray-200 hover:bg-gray-50 transition-colors group"
+            >
+              <img src={LOGO_IMG} alt="Logo" className="w-9 h-9 rounded-full object-cover flex-shrink-0 border border-gray-200" />
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-bold text-gray-900 leading-tight">JP BARBER STUDIO</p>
+                <p className="text-xs text-gray-500 mt-0.5 leading-snug">13008 Boul. Henri-Bourassa, Quebec, QC G1G 3Y4</p>
+              </div>
+              <div className="flex-shrink-0 w-8 h-8 rounded-full border border-gray-200 flex items-center justify-center text-gray-400 group-hover:text-blue-500 group-hover:border-blue-400 transition-colors">
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                </svg>
+              </div>
+            </a>
+
             <div className="px-4 py-4 space-y-5">
 
               {/* Book Now */}
@@ -473,12 +498,12 @@ export default function Home() {
                 to={bookLink}
                 className="block w-full bg-teal-600 hover:bg-teal-700 text-white font-bold py-3 rounded text-center text-sm transition-colors"
               >
-                Book now
+                {tx('Book now', 'Prendre rendez-vous')}
               </Link>
 
               {/* About Us */}
               <div className="border-t border-gray-100 pt-4">
-                <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">About Us</h3>
+                <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">{tx('About Us', 'À propos')}</h3>
                 <p className={`text-sm text-gray-600 leading-relaxed ${!showAbout ? 'line-clamp-4' : ''}`}>
                   {ABOUT_TEXT}
                 </p>
@@ -492,7 +517,7 @@ export default function Home() {
 
               {/* Staffers */}
               <div className="border-t border-gray-100 pt-4">
-                <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">Staffers</h3>
+                <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">{tx('Staffers', 'Personnel')}</h3>
                 <div className="flex gap-5">
                   <div className="text-center">
                     <img src={LOGO_IMG} alt="JP" className="w-14 h-14 rounded-full object-cover mx-auto ring-2 ring-gray-200" />
@@ -504,16 +529,16 @@ export default function Home() {
                         <path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/>
                       </svg>
                     </div>
-                    <p className="text-xs text-gray-700 font-medium mt-1">Roland</p>
+                    <p className="text-xs text-gray-700 font-medium mt-1">Admin</p>
                   </div>
                 </div>
               </div>
 
               {/* Business Hours */}
               <div className="border-t border-gray-100 pt-4">
-                <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">Business Hours</h3>
+                <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">{tx('Business Hours', 'Heures d\'ouverture')}</h3>
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium text-gray-700">Today</span>
+                  <span className="text-sm font-medium text-gray-700">{tx('Today', "Aujourd'hui")}</span>
                   <span className={`text-sm font-medium ${todayHours?.open ? 'text-gray-600' : 'text-red-500'}`}>
                     {todayHours?.open ? `${todayHours.open} – ${todayHours.close}` : 'Closed'}
                   </span>
@@ -522,7 +547,7 @@ export default function Home() {
                   onClick={() => setShowFullWeek(v => !v)}
                   className="mt-2 text-sm text-blue-500 flex items-center gap-1 hover:underline"
                 >
-                  Show full week {showFullWeek ? '∧' : '∨'}
+                  {tx('Show full week', 'Voir la semaine complète')} {showFullWeek ? '∧' : '∨'}
                 </button>
                 {showFullWeek && (
                   <div className="mt-3 space-y-2">
