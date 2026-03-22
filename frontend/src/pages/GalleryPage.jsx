@@ -3,6 +3,14 @@ import toast from 'react-hot-toast';
 import api from '../utils/api';
 import { useAuth } from '../context/AuthContext';
 
+// On Render, VITE_API_URL = 'https://backend.onrender.com/api'
+// Uploads are served from 'https://backend.onrender.com/uploads/...'
+const BACKEND_BASE = import.meta.env.VITE_API_URL
+  ? import.meta.env.VITE_API_URL.replace(/\/api\/?$/, '')
+  : '';
+
+const mediaUrl = (path) => `${BACKEND_BASE}${path}`;
+
 const TABS = ['ALL', 'IMAGE', 'VIDEO'];
 
 export default function GalleryPage() {
@@ -150,12 +158,12 @@ export default function GalleryPage() {
                     muted
                     playsInline
                   >
-                    <source src={item.url} type="video/mp4" />
-                    <source src={item.url} type="video/webm" />
+                    <source src={mediaUrl(item.url)} type="video/mp4" />
+                    <source src={mediaUrl(item.url)} type="video/webm" />
                   </video>
                 ) : (
                   <img
-                    src={item.url}
+                    src={mediaUrl(item.url)}
                     alt={item.title}
                     className="w-full h-full object-cover cursor-pointer"
                     onClick={() => setLightbox(item)}
@@ -211,15 +219,15 @@ export default function GalleryPage() {
             ✕
           </button>
           <div className="max-w-4xl w-full" onClick={e => e.stopPropagation()}>
-          {lightbox.type === 'VIDEO' ? (
+            {lightbox.type === 'VIDEO' ? (
               <video controls autoPlay className="w-full rounded-xl max-h-[80vh]">
-                <source src={lightbox.url} type="video/mp4" />
-                <source src={lightbox.url} type="video/webm" />
-                <source src={lightbox.url} type="video/quicktime" />
+                <source src={mediaUrl(lightbox.url)} type="video/mp4" />
+                <source src={mediaUrl(lightbox.url)} type="video/webm" />
+                <source src={mediaUrl(lightbox.url)} type="video/quicktime" />
                 Your browser does not support this video format.
               </video>
             ) : (
-              <img src={lightbox.url} alt={lightbox.title} className="w-full rounded-xl max-h-[80vh] object-contain" />
+              <img src={mediaUrl(lightbox.url)} alt={lightbox.title} className="w-full rounded-xl max-h-[80vh] object-contain" />
             )}
             <div className="text-center mt-4">
               <p className="text-white font-semibold text-lg">{lightbox.title}</p>
