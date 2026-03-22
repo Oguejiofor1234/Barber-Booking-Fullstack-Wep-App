@@ -20,12 +20,12 @@ const CLIENT_PHOTOS = [
 ];
 
 const HOURS = [
-  { day: 'Monday',    open: '10:00 AM', close: '7:00 PM'  },
-  { day: 'Tuesday',   open: '10:00 AM', close: '7:00 PM'  },
-  { day: 'Wednesday', open: '10:00 AM', close: '7:00 PM'  },
-  { day: 'Thursday',  open: '10:00 AM', close: '7:00 PM'  },
-  { day: 'Friday',    open: '10:00 AM', close: '7:00 PM'  },
-  { day: 'Saturday',  open: '9:00 AM',  close: '5:00 PM'  },
+  { day: 'Monday',    open: '8:00 AM', close: '8:00 PM'  },
+  { day: 'Tuesday',   open: '8:00 AM', close: '8:00 PM'  },
+  { day: 'Wednesday', open: '8:00 AM', close: '8:00 PM'  },
+  { day: 'Thursday',  open: '8:00 AM', close: '8:00 PM'  },
+  { day: 'Friday',    open: '8:00 AM', close: '8:00 PM'  },
+  { day: 'Saturday',  open: '8:00 AM',  close: '8:00 PM'  },
   { day: 'Sunday',    open: null,       close: null        },
 ];
 
@@ -232,7 +232,7 @@ export default function Home() {
                   <img src={LOGO_IMG} alt="JP Barber Studio Logo" className="w-12 h-12 rounded-full object-cover flex-shrink-0 border border-gray-200" />
                   <div>
                     <h1 className="text-xl font-bold text-gray-900 leading-tight">JP BARBER STUDIO</h1>
-                    <p className="text-xs text-gray-500 mt-0.5">3095 Argentia Rd, Suite #30, L5N 8P7, Mississauga</p>
+                    <p className="text-xs text-gray-500 mt-0.5">13008 Boul.Henri-Bourassa, Quebec, QC GIG 3Y4</p>
                   </div>
                 </div>
                 <div className="flex gap-2 mt-1">
