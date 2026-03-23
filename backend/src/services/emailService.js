@@ -1,20 +1,17 @@
-const nodemailer = require('nodemailer');
+const sgMail = require('@sendgrid/mail');
 
-const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST || 'smtp-relay.brevo.com',
-  port: parseInt(process.env.SMTP_PORT || '587'),
-  secure: false,
-  auth: {
-    user: process.env.SMTP_USER,
-    pass: process.env.SMTP_PASS,
-  },
-});
+if (process.env.SENDGRID_API_KEY) {
+  sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+}
 
-const FROM = `"${process.env.SHOP_NAME || 'JP Barber Shop'}" <${process.env.SMTP_FROM || process.env.SMTP_USER}>`;
+const FROM     = process.env.SENDGRID_FROM || 'oguejiofor.mbah@fuoye.edu.ng';
 const TIMEZONE = process.env.SHOP_TIMEZONE || 'America/Toronto';
 
-// Skip sending if SMTP is not configured
-const smtpEnabled = () => !!(process.env.SMTP_USER && process.env.SMTP_PASS);
+// Skip sending if SendGrid API key is not configured
+const smtpEnabled = () => !!process.env.SENDGRID_API_KEY;
+
+const send = ({ to, subject, html }) =>
+  sgMail.send({ from: FROM, to, subject, html });
 
 /**
  * Format a booking date/time using the appropriate locale.
@@ -66,7 +63,7 @@ const sendBookingConfirmationToCustomer = async ({ customerEmail, customerName, 
     </table>
     <p style="color:#888">You'll receive another email once the barber confirms your booking.</p>`;
 
-  await transporter.sendMail({ from: FROM, to: customerEmail, subject, html: wrapHtml(body) });
+  await send({ to: customerEmail, subject, html: wrapHtml(body) });
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -103,7 +100,7 @@ const sendBookingStatusToCustomer = async ({ customerEmail, customerName, servic
       ? 'We look forward to seeing you! Please arrive 5 minutes early.'
       : 'Feel free to book another slot at your convenience.'}</p>`;
 
-  await transporter.sendMail({ from: FROM, to: customerEmail, subject, html: wrapHtml(body) });
+  await send({ to: customerEmail, subject, html: wrapHtml(body) });
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -111,8 +108,7 @@ const sendBookingStatusToCustomer = async ({ customerEmail, customerName, servic
 // ─────────────────────────────────────────────────────────────────────────────
 const sendCancellationToBarber = async ({ barberEmail, barberName, customerName, service, dateTime }) => {
   if (!smtpEnabled()) return;
-  await transporter.sendMail({
-    from: FROM,
+  await send({
     to: barberEmail,
     subject: '❌ Booking Cancelled by Customer',
     html: `
@@ -130,8 +126,7 @@ const sendCancellationToBarber = async ({ barberEmail, barberName, customerName,
 
 const sendNewBookingToBarber = async ({ barberEmail, barberName, customerName, service, dateTime, bookingId }) => {
   if (!smtpEnabled()) return;
-  await transporter.sendMail({
-    from: FROM,
+  await send({
     to: barberEmail,
     subject: '📋 New Booking Request',
     html: `
